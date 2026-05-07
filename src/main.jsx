@@ -57,6 +57,17 @@ function currency(value) {
   return `GHS ${Number(value || 0).toLocaleString()}`;
 }
 
+function formatAuthError(message) {
+  if (!message) return 'Authentication failed. Please try again.';
+  const lowerMessage = message.toLowerCase();
+
+  if (lowerMessage.includes('email rate limit') || lowerMessage.includes('rate limit')) {
+    return 'Supabase has temporarily hit its authentication email sending limit. Try again later, or configure custom SMTP in Supabase Auth before onboarding more users.';
+  }
+
+  return message;
+}
+
 function todayIso() {
   return new Date().toISOString().slice(0, 10);
 }
@@ -634,7 +645,7 @@ function AuthScreen({ message }) {
     const result = mode === 'sign-up'
       ? await supabase.auth.signUp({ email, password, options: { data: { full_name: fullName } } })
       : await supabase.auth.signInWithPassword({ email, password });
-    if (result.error) setStatus(result.error.message);
+    if (result.error) setStatus(formatAuthError(result.error.message));
     else if (mode === 'sign-up' && !result.data.session) setStatus('Account created. Check the email inbox if confirmation is enabled.');
   }
 
@@ -642,7 +653,7 @@ function AuthScreen({ message }) {
     event.preventDefault();
     const email = new FormData(event.currentTarget).get('email');
     const { error } = await supabase.auth.resetPasswordForEmail(email);
-    setStatus(error ? error.message : 'Password reset email sent.');
+    setStatus(error ? formatAuthError(error.message) : 'Password reset email sent.');
   }
 
   return (

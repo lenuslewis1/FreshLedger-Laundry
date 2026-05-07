@@ -55,6 +55,10 @@ The app uses:
 
 All app tables are protected with Row Level Security.
 
+### Production Auth Email
+
+Supabase's default Auth email sender is for testing and has strict rate limits. Before onboarding real users, configure custom SMTP in the Supabase dashboard under Authentication > SMTP. Signup confirmation, password reset, magic link, and invite emails all count toward Auth email sending limits.
+
 ## Build
 
 ```bash
